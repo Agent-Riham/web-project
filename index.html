@@ -1,0 +1,1670 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>90-Day Discipline Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #00ffff;
+      --secondary: #ff00ff;
+      --bg: #000;
+      --text: #00ffff;
+    }
+    
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background-color: var(--bg);
+      color: var(--text);
+      text-align: center;
+      padding: 30px;
+      margin: 0;
+      user-select: none;
+      transition: all 0.3s ease;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .title-container {
+      text-align: left;
+    }
+    
+    .subtitle {
+      font-size: 14px;
+      color: var(--secondary);
+      margin-top: -10px;
+      font-style: italic;
+    }
+    
+    .star-container {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .star-icon {
+      font-size: 24px;
+      color: gold;
+    }
+    
+    .star-count {
+      font-size: 20px;
+    }
+    
+    .star-note {
+      font-size: 12px;
+      color: #666;
+      margin-top: 3px;
+    }
+    
+    #countdown {
+      font-size: 36px;
+      margin: 20px 0;
+      animation: glow 2s infinite;
+    }
+    
+    @keyframes glow {
+      0% { text-shadow: 0 0 5px var(--primary); }
+      50% { text-shadow: 0 0 20px var(--primary), 0 0 30px var(--secondary); }
+      100% { text-shadow: 0 0 5px var(--primary); }
+    }
+    
+    #progressBar {
+      width: 80%;
+      height: 20px;
+      margin-bottom: 20px;
+      accent-color: var(--primary);
+      border-radius: 10px;
+      border: 1px solid var(--primary);
+    }
+    
+    input, button, select, textarea {
+      padding: 10px;
+      margin: 5px;
+      background-color: #111;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+    
+    input:focus, button:hover, textarea:focus {
+      background-color: #003333;
+      outline: none;
+    }
+    
+    ul {
+      list-style: none;
+      padding: 0;
+      max-width: 450px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    
+    li {
+      padding: 8px 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #004040;
+    }
+    
+    li.done {
+      opacity: 0.6;
+      text-decoration: line-through;
+    }
+    
+    .task-content {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-grow: 1;
+    }
+    
+    .checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--primary);
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    .checkbox.checked::after {
+      content: '✓';
+      color: var(--primary);
+      position: absolute;
+      top: -2px;
+      left: 3px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    
+    .task-actions {
+      display: flex;
+      gap: 5px;
+    }
+    
+    .task-actions button {
+      padding: 5px 8px;
+      font-size: 14px;
+    }
+    
+    .section {
+      margin: 25px 0;
+      border: 1px solid var(--primary);
+      padding: 15px;
+      border-radius: 8px;
+    }
+    
+    .button-row {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    
+    #quote {
+      font-style: italic;
+      margin: 20px 0;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 10px;
+      border-left: 3px solid var(--primary);
+    }
+    
+    .priority-indicator {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+    
+    .priority-1 { background-color: #ff0000; }
+    .priority-2 { background-color: #ff6600; }
+    .priority-3 { background-color: #ffcc00; }
+    .priority-4 { background-color: #66cc00; }
+    .priority-5 { background-color: #00cc00; }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-content {
+      background-color: var(--bg);
+      border: 2px solid var(--primary);
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 80%;
+      max-height: 80%;
+      overflow-y: auto;
+    }
+    
+    .close-modal {
+      float: right;
+      cursor: pointer;
+      font-size: 24px;
+    }
+    
+    .badge {
+      border: 1px solid var(--primary);
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .badge.locked {
+      opacity: 0.6;
+    }
+    
+    .badge-icon {
+      font-size: 30px;
+      min-width: 40px;
+    }
+    
+    .badge-info {
+      flex-grow: 1;
+      text-align: left;
+    }
+    
+    .badge-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .badge-desc {
+      font-size: 14px;
+      color: #aaa;
+    }
+    
+    .badge-price {
+      font-size: 14px;
+      color: gold;
+    }
+    
+    .badge-select {
+      background-color: #003333;
+      border: 1px solid var(--primary);
+      padding: 5px 10px;
+      border-radius: 3px;
+      margin-top: 5px;
+      cursor: pointer;
+    }
+    
+    .badge-buy {
+      background-color: #003300;
+      border: 1px solid #00aa00;
+      padding: 5px 10px;
+      border-radius: 3px;
+      margin-top: 5px;
+      cursor: pointer;
+    }
+    
+    .tool-icon {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      font-size: 24px;
+      background-color: #111;
+      border: 1px solid var(--primary);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 10;
+    }
+    
+    .achievement-icon {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      font-size: 24px;
+      background-color: #111;
+      border: 1px solid var(--primary);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 10;
+    }
+    
+    .journal-icon {
+      position: fixed;
+      bottom: 140px;
+      right: 20px;
+      font-size: 24px;
+      background-color: #111;
+      border: 1px solid var(--primary);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 10;
+    }
+    
+    .journal-entry {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #004040;
+      border-radius: 5px;
+    }
+    
+    .journal-date {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: var(--secondary);
+    }
+    
+    .skip-info {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--secondary);
+    }
+    
+    .day-navigation {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    
+    .day-viewer {
+      margin-top: 20px;
+      border-top: 1px solid var(--primary);
+      padding-top: 20px;
+    }
+    
+    .day-title {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: var(--secondary);
+    }
+    
+    .day-tasks {
+      text-align: left;
+      margin-bottom: 15px;
+    }
+    
+    .day-completed {
+      color: #00ff00;
+    }
+    
+    .day-skipped {
+      color: #ff9900;
+    }
+    
+    /* Timeline Icon and Modal Styles */
+    .timeline-icon {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      font-size: 24px;
+      background-color: #111;
+      border: 1px solid var(--primary);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 10;
+    }
+    
+    #timelineModal {
+      display: none;
+    }
+    
+    .timeline-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .timeline-visual {
+      position: relative;
+      height: 100px;
+      margin: 30px 0;
+      border: 1px solid var(--primary);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    
+    .timeline-track {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: var(--primary);
+      transform: translateY(-50%);
+    }
+    
+    .spaceship {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 30px;
+      height: 30px;
+      transform: translate(-50%, -50%);
+      transition: left 0.5s ease;
+    }
+    
+    .spaceship svg {
+      width: 100%;
+      height: 100%;
+      fill: var(--primary);
+    }
+    
+    .timeline-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .timeline-input {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .timeline-input label {
+      min-width: 100px;
+      text-align: right;
+    }
+    
+    .timeline-milestones {
+      margin-top: 20px;
+      text-align: left;
+    }
+    
+    .milestone {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 8px;
+      border: 1px solid var(--primary);
+      border-radius: 4px;
+    }
+    
+    .milestone-date {
+      min-width: 100px;
+      font-weight: bold;
+    }
+    
+    .milestone-desc {
+      flex-grow: 1;
+    }
+    
+    @media (max-width: 600px) {
+      body {
+        padding: 15px;
+      }
+      
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      
+      #countdown {
+        font-size: 28px;
+      }
+      
+      input {
+        width: 70%;
+      }
+      
+      .todo-input-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .button-row {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .button-row button {
+        width: 80%;
+      }
+      
+      .timeline-input {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .timeline-input label {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="title-container">
+      <h1>90-Day Discipline Tracker</h1>
+      <div class="subtitle" id="userSubtitle">Common Guy</div>
+    </div>
+    <div class="star-container">
+      <div>
+        <div class="star-icon">⭐</div>
+        <div class="star-count" id="starCount">0</div>
+      </div>
+      <div class="star-note">Earn 1 star for completing 10+ tasks daily</div>
+    </div>
+  </div>
+  
+  <div id="countdown"></div>
+  <progress id="progressBar" value="0" max="90"></progress>
+  <div id="successMessage"></div>
+  <div id="quote"></div>
+
+  <div class="section">
+    <h3>✔ Mandatory Tasks</h3>
+    <div class="todo-input-wrapper">
+      <input type="text" id="mustTaskInput" placeholder="Add mandatory task" />
+      <button id="addMustTaskBtn">➕ Add</button>
+    </div>
+    <ul id="mustList"></ul>
+  </div>
+
+  <div class="section">
+    <h3>＋ Today's Personal Tasks</h3>
+    <div class="todo-input-wrapper">
+      <input type="text" id="todoInput" placeholder="Add task" />
+      <select id="prioritySelect">
+        <option value="3">Normal Priority</option>
+        <option value="1">Highest Priority</option>
+        <option value="2">High Priority</option>
+        <option value="4">Low Priority</option>
+        <option value="5">Lowest Priority</option>
+      </select>
+      <button id="addTodoBtn">＋ Add</button>
+    </div>
+    <ul id="dailyList"></ul>
+  </div>
+
+  <div class="button-row">
+    <button id="startBtn">▶ Start</button>
+    <button id="resetBtn">⟳ Reset</button>
+    <button id="stopBtn">■ Stop</button>
+    <button id="skipDayBtn">⏭ Skip Day</button>
+    <button id="toggleAudioBtn">🔊 Sound</button>
+  </div>
+
+  <!-- Achievement and Badge Shop Icons -->
+  <div class="achievement-icon" id="achievementBtn">🏆</div>
+  <div class="tool-icon" id="badgeShopBtn">🛒</div>
+  <div class="journal-icon" id="journalBtn">📔</div>
+  
+  <!-- Timeline Icon -->
+  <div class="timeline-icon" id="timelineBtn">⏱️</div>
+
+  <!-- Badge Shop Modal -->
+  <div id="badgeShopModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" id="closeBadgeShop">&times;</span>
+      <h2>Badge Shop</h2>
+      <p>Use stars to unlock new badges</p>
+      <div id="badgeShopItems"></div>
+    </div>
+  </div>
+
+  <!-- Achievements Modal -->
+  <div id="achievementsModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" id="closeAchievements">&times;</span>
+      <h2>Your Achievements</h2>
+      <div id="achievementsList"></div>
+    </div>
+  </div>
+
+  <!-- Journal Modal -->
+  <div id="journalModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" id="closeJournal">&times;</span>
+      <h2>Daily Journal</h2>
+      <textarea id="journalEntry" placeholder="What did you learn today? How do you feel? Write your thoughts here..." rows="5"></textarea>
+      <button id="saveJournalBtn">💾 Save Entry</button>
+      
+      <div class="day-navigation">
+        <button id="prevDayBtn">◀ Previous Day</button>
+        <span id="currentDayDisplay">Day 1</span>
+        <button id="nextDayBtn">Next Day ▶</button>
+      </div>
+      
+      <div id="journalEntries"></div>
+      
+      <div class="day-viewer" id="dayViewer">
+        <div class="day-title" id="dayTitle">Day 1</div>
+        <div class="day-tasks" id="dayTasks"></div>
+        <div id="dayJournal"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Timeline Modal -->
+  <div id="timelineModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" id="closeTimeline">&times;</span>
+      <h2>Set Your Timeline</h2>
+      
+      <div class="timeline-container">
+        <div class="timeline-visual">
+          <div class="timeline-track"></div>
+          <div class="spaceship" id="spaceship">
+            <svg viewBox="0 0 24 24">
+              <path d="M12,2L4,12L12,22L20,12L12,2M12,6L17,12L12,18L7,12L12,6Z" />
+            </svg>
+          </div>
+        </div>
+        
+        <div class="timeline-controls">
+          <div class="timeline-input">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" />
+          </div>
+          
+          <div class="timeline-input">
+            <label for="endDate">End Date:</label>
+            <input type="date" id="endDate" />
+          </div>
+          
+          <div class="timeline-input">
+            <label for="dailyStartTime">Daily Start Time:</label>
+            <input type="time" id="dailyStartTime" />
+          </div>
+          
+          <button id="saveTimelineBtn">Save Timeline</button>
+        </div>
+        
+        <div class="timeline-milestones">
+          <h3>Your Timeline Progress</h3>
+          <div id="milestonesList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <audio id="bgMusic" loop>
+    <source src="https://www.fesliyanstudios.com/play-mp3/387" type="audio/mpeg" />
+    Your browser does not support audio
+  </audio>
+  
+  <audio id="countdownSound">
+    <source src="https://www.soundjay.com/misc/sounds/countdown-01.mp3" type="audio/mpeg" />
+    Your browser does not support audio
+  </audio>
+
+  <script>
+    const START_DAYS = 90;
+    const MAX_SKIP_DAYS = 3;
+    let mustTodos = [
+      "🧠 Study for 1 hour",
+      "📓 Review notes",
+      "🧘‍♂️ Meditate for 5 minutes",
+      "🚶 Take a walk or exercise",
+      "📴 Turn off phone for 1 hour"
+    ];
+
+    // Badge data
+    const badges = [
+      {
+        id: 'focus_seed',
+        title: 'Focus Seed',
+        desc: 'Symbol of concentration',
+        price: 5,
+        icon: '🌱',
+        owned: false,
+        selected: false
+      },
+      {
+        id: 'future_idol',
+        title: 'Future Idol',
+        desc: 'Inspiration for the future',
+        price: 10,
+        icon: '🌟',
+        owned: false,
+        selected: false
+      },
+      {
+        id: 'discipline_spirit',
+        title: 'Discipline Spirit',
+        desc: 'Symbol of silent strength',
+        price: 20,
+        icon: '⚡',
+        owned: false,
+        selected: false
+      },
+      {
+        id: 'mind_engineer',
+        title: 'Mind Engineer',
+        desc: 'Engineer of thoughts',
+        price: 35,
+        icon: '🧠',
+        owned: false,
+        selected: false
+      },
+      {
+        id: 'legendary_soul',
+        title: 'Legendary Soul',
+        desc: 'Legendary mindset',
+        price: 50,
+        icon: '👑',
+        owned: false,
+        selected: false
+      }
+    ];
+
+    // DOM Elements
+    const countdownEl = document.getElementById("countdown");
+    const progressBar = document.getElementById("progressBar");
+    const successMsg = document.getElementById("successMessage");
+    const quoteEl = document.getElementById("quote");
+    const mustList = document.getElementById("mustList");
+    const dailyList = document.getElementById("dailyList");
+    const todoInput = document.getElementById("todoInput");
+    const mustTaskInput = document.getElementById("mustTaskInput");
+    const addMustTaskBtn = document.getElementById("addMustTaskBtn");
+    const bgMusic = document.getElementById("bgMusic");
+    const countdownSound = document.getElementById("countdownSound");
+    const prioritySelect = document.getElementById("prioritySelect");
+    const starCountEl = document.getElementById("starCount");
+    const userSubtitleEl = document.getElementById("userSubtitle");
+    const badgeShopBtn = document.getElementById("badgeShopBtn");
+    const achievementBtn = document.getElementById("achievementBtn");
+    const journalBtn = document.getElementById("journalBtn");
+    const timelineBtn = document.getElementById("timelineBtn");
+    const badgeShopModal = document.getElementById("badgeShopModal");
+    const achievementsModal = document.getElementById("achievementsModal");
+    const journalModal = document.getElementById("journalModal");
+    const timelineModal = document.getElementById("timelineModal");
+    const badgeShopItems = document.getElementById("badgeShopItems");
+    const achievementsList = document.getElementById("achievementsList");
+    const journalEntry = document.getElementById("journalEntry");
+    const journalEntries = document.getElementById("journalEntries");
+    const saveJournalBtn = document.getElementById("saveJournalBtn");
+    const closeBadgeShop = document.getElementById("closeBadgeShop");
+    const closeAchievements = document.getElementById("closeAchievements");
+    const closeJournal = document.getElementById("closeJournal");
+    const closeTimeline = document.getElementById("closeTimeline");
+    const prevDayBtn = document.getElementById("prevDayBtn");
+    const nextDayBtn = document.getElementById("nextDayBtn");
+    const currentDayDisplay = document.getElementById("currentDayDisplay");
+    const dayViewer = document.getElementById("dayViewer");
+    const dayTitle = document.getElementById("dayTitle");
+    const dayTasks = document.getElementById("dayTasks");
+    const dayJournal = document.getElementById("dayJournal");
+    const spaceship = document.getElementById("spaceship");
+    const startDateInput = document.getElementById("startDate");
+    const endDateInput = document.getElementById("endDate");
+    const dailyStartTimeInput = document.getElementById("dailyStartTime");
+    const saveTimelineBtn = document.getElementById("saveTimelineBtn");
+    const milestonesList = document.getElementById("milestonesList");
+
+    const startBtn = document.getElementById("startBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const skipDayBtn = document.getElementById("skipDayBtn");
+    const toggleAudioBtn = document.getElementById("toggleAudioBtn");
+    const addTodoBtn = document.getElementById("addTodoBtn");
+
+    // App State
+    let dailyTodos = [];
+    let mustTodoState = [];
+    let countdownActive = false;
+    let audioPlaying = false;
+    let mustListLocked = false;
+    let totalStars = 0;
+    let selectedBadge = null;
+    let skipDaysUsed = 0;
+    let currentDay = 1;
+    let programData = {
+      startDate: null,
+      days: {},
+      currentDay: 1,
+      journalEntries: [],
+      timelineSettings: {
+        startDate: null,
+        endDate: null,
+        dailyStartTime: "08:00"
+      }
+    };
+    
+    let timelineInterval;
+    let countdownInterval;
+
+    // Bengali motivational quotes
+    const banglaQuotes = [
+      "অপেক্ষা করুন, ধৈর্য্য ধরুন - সাফল্য আসবেই।",
+      "ছোট ছোট পদক্ষেপই বিশাল সাফল্যের দিকে নিয়ে যায়।",
+      "আজ যা করছেন, তার ফল ভবিষ্যতে পাবেন।",
+      "নিজেকে বিশ্বাস করুন, আপনি যা চান তা অর্জন করতে পারেন।",
+      "কঠোর পরিশ্রম কখনও বিফলে যায় না।",
+      "প্রতিদিন একটু একটু করে উন্নতি করুন।",
+      "ব্যর্থতা সাফল্যেরই আরেক নাম।",
+      "ধৈর্য্য ধারণ করুন, সাফল্য আসবেই।"
+    ];
+
+    // Initialize the app
+    function init() {
+      loadProgramData();
+      loadMustState();
+      loadDailyTodos();
+      loadStarSystem();
+      
+      mustListLocked = programData.startDate !== null;
+      countdownActive = programData.startDate !== null;
+      audioPlaying = false;
+
+      renderMustList();
+      renderDailyTodos();
+      updateCountdown();
+      showRandomQuote();
+      renderBadgeShop();
+      renderAchievements();
+      loadTimelineSettings();
+
+      toggleAudioBtn.textContent = "🔈 Sound Off";
+      
+      // Initialize timeline settings
+      if (programData.timelineSettings) {
+        startDateInput.value = programData.timelineSettings.startDate || "";
+        endDateInput.value = programData.timelineSettings.endDate || "";
+        dailyStartTimeInput.value = programData.timelineSettings.dailyStartTime || "08:00";
+      }
+      
+      // Start timeline update if we have settings
+      if (programData.timelineSettings.startDate && programData.timelineSettings.endDate) {
+        updateTimelineVisual();
+        startTimelineUpdates();
+        renderMilestones();
+      }
+    }
+
+    // Load program data
+    function loadProgramData() {
+      const savedData = localStorage.getItem("programData");
+      if (savedData) {
+        programData = JSON.parse(savedData);
+        currentDay = programData.currentDay;
+      }
+    }
+
+    // Save program data
+    function saveProgramData() {
+      localStorage.setItem("programData", JSON.stringify(programData));
+    }
+
+    // Load timeline settings
+    function loadTimelineSettings() {
+      if (!programData.timelineSettings) {
+        programData.timelineSettings = {
+          startDate: null,
+          endDate: null,
+          dailyStartTime: "08:00"
+        };
+      }
+    }
+
+    // Save timeline settings
+    function saveTimelineSettings() {
+      programData.timelineSettings = {
+        startDate: startDateInput.value,
+        endDate: endDateInput.value,
+        dailyStartTime: dailyStartTimeInput.value
+      };
+      saveProgramData();
+    }
+
+    // Update timeline visual
+    function updateTimelineVisual() {
+      if (!programData.timelineSettings.startDate || !programData.timelineSettings.endDate) return;
+      
+      const startDate = new Date(programData.timelineSettings.startDate);
+      const endDate = new Date(programData.timelineSettings.endDate);
+      const now = new Date();
+      
+      // Calculate progress percentage
+      const totalDuration = endDate - startDate;
+      const elapsed = now - startDate;
+      let progress = Math.min(Math.max(elapsed / totalDuration, 0), 1);
+      
+      // Update spaceship position
+      spaceship.style.left = `${progress * 100}%`;
+      
+      // Update spaceship direction if we're past the end date
+      if (now > endDate) {
+        spaceship.style.transform = "translate(-50%, -50%) rotate(180deg)";
+      } else {
+        spaceship.style.transform = "translate(-50%, -50%)";
+      }
+    }
+
+    // Start timeline updates
+    function startTimelineUpdates() {
+      clearInterval(timelineInterval);
+      updateTimelineVisual();
+      timelineInterval = setInterval(updateTimelineVisual, 60000); // Update every minute
+    }
+
+    // Render milestones
+    function renderMilestones() {
+      if (!programData.timelineSettings.startDate || !programData.timelineSettings.endDate) return;
+      
+      const startDate = new Date(programData.timelineSettings.startDate);
+      const endDate = new Date(programData.timelineSettings.endDate);
+      const now = new Date();
+      
+      milestonesList.innerHTML = '';
+      
+      // Calculate important milestones
+      const milestones = [
+        { date: startDate, desc: "Challenge Started" },
+        { date: new Date(startDate.getTime() + (endDate - startDate) * 0.25), desc: "25% Completed" },
+        { date: new Date(startDate.getTime() + (endDate - startDate) * 0.5), desc: "Halfway Point" },
+        { date: new Date(startDate.getTime() + (endDate - startDate) * 0.75), desc: "75% Completed" },
+        { date: endDate, desc: "Challenge Completed" }
+      ];
+      
+      milestones.forEach(milestone => {
+        const milestoneDiv = document.createElement('div');
+        milestoneDiv.className = 'milestone';
+        
+        const dateDiv = document.createElement('div');
+        dateDiv.className = 'milestone-date';
+        dateDiv.textContent = milestone.date.toLocaleDateString();
+        
+        const descDiv = document.createElement('div');
+        descDiv.className = 'milestone-desc';
+        descDiv.textContent = milestone.desc;
+        
+        // Highlight if this milestone is in the future
+        if (milestone.date > now) {
+          milestoneDiv.style.opacity = '0.7';
+        }
+        
+        milestoneDiv.appendChild(dateDiv);
+        milestoneDiv.appendChild(descDiv);
+        milestonesList.appendChild(milestoneDiv);
+      });
+    }
+
+    // Start countdown sound effect
+    function playCountdownSound() {
+      if (audioPlaying) {
+        countdownSound.currentTime = 0;
+        countdownSound.play().catch(e => console.log("Countdown sound blocked:", e));
+      }
+    }
+
+    // Load mandatory tasks state
+    function loadMustState() {
+      mustTodoState = mustTodos.map(() => false);
+      if (programData.startDate && programData.days[currentDay]) {
+        mustTodoState = programData.days[currentDay].mustTodoState || mustTodoState;
+      }
+    }
+
+    // Save mandatory tasks state
+    function saveMustState() {
+      if (!programData.days[currentDay]) {
+        programData.days[currentDay] = {};
+      }
+      programData.days[currentDay].mustTodoState = mustTodoState;
+      saveProgramData();
+      checkStarEarning();
+    }
+
+    // Render mandatory tasks list
+    function renderMustList() {
+      mustList.innerHTML = "";
+      mustTodos.forEach((task, index) => {
+        const li = document.createElement("li");
+        if (mustTodoState[index]) li.classList.add("done");
+
+        const taskContent = document.createElement("div");
+        taskContent.className = "task-content";
+
+        const checkbox = document.createElement("span");
+        checkbox.className = "checkbox" + (mustTodoState[index] ? " checked" : "");
+        checkbox.onclick = () => {
+          mustTodoState[index] = !mustTodoState[index];
+          saveMustState();
+          renderMustList();
+        };
+
+        const text = document.createElement("span");
+        text.textContent = task;
+
+        taskContent.appendChild(checkbox);
+        taskContent.appendChild(text);
+
+        const taskActions = document.createElement("div");
+        taskActions.className = "task-actions";
+
+        if (!mustListLocked) {
+          const editBtn = document.createElement("button");
+          editBtn.textContent = "✏️";
+          editBtn.onclick = (e) => {
+            e.stopPropagation();
+            const newTask = prompt("Edit task:", task);
+            if (newTask && newTask.trim()) {
+              mustTodos[index] = newTask.trim();
+              saveMustState();
+              renderMustList();
+            }
+          };
+
+          const deleteBtn = document.createElement("button");
+          deleteBtn.textContent = "❌";
+          deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            if (confirm("Delete this task?")) {
+              mustTodos.splice(index, 1);
+              mustTodoState.splice(index, 1);
+              saveMustState();
+              renderMustList();
+            }
+          };
+
+          taskActions.appendChild(editBtn);
+          taskActions.appendChild(deleteBtn);
+        }
+
+        li.appendChild(taskContent);
+        li.appendChild(taskActions);
+        mustList.appendChild(li);
+      });
+    }
+
+    // Add mandatory task
+    function addMustTask() {
+      const val = mustTaskInput.value.trim();
+      if (!val) return;
+      mustTodos.push(val);
+      mustTodoState.push(false);
+      mustTaskInput.value = "";
+      saveMustState();
+      renderMustList();
+    }
+
+    // Load daily tasks
+    function loadDailyTodos() {
+      dailyTodos = [];
+      if (programData.days[currentDay]) {
+        dailyTodos = programData.days[currentDay].dailyTodos || [];
+      }
+    }
+
+    // Save daily tasks
+    function saveDailyTodos() {
+      if (!programData.days[currentDay]) {
+        programData.days[currentDay] = {};
+      }
+      programData.days[currentDay].dailyTodos = dailyTodos;
+      saveProgramData();
+      checkStarEarning();
+    }
+
+    // Render daily tasks
+    function renderDailyTodos() {
+      dailyList.innerHTML = "";
+      dailyTodos.forEach((todo, index) => {
+        const li = document.createElement("li");
+        if (todo.done) li.classList.add("done");
+
+        const taskContent = document.createElement("div");
+        taskContent.className = "task-content";
+
+        const checkbox = document.createElement("span");
+        checkbox.className = "checkbox" + (todo.done ? " checked" : "");
+        checkbox.onclick = e => {
+          e.stopPropagation();
+          dailyTodos[index].done = !dailyTodos[index].done;
+          saveDailyTodos();
+          renderDailyTodos();
+        };
+
+        const priority = document.createElement("span");
+        priority.className = `priority-indicator priority-${todo.priority}`;
+        priority.title = `Priority: ${todo.priority}`;
+
+        const text = document.createElement("span");
+        text.textContent = todo.text;
+
+        taskContent.appendChild(checkbox);
+        taskContent.appendChild(priority);
+        taskContent.appendChild(text);
+
+        li.onclick = () => {
+          dailyTodos[index].done = !dailyTodos[index].done;
+          saveDailyTodos();
+          renderDailyTodos();
+        };
+
+        li.appendChild(taskContent);
+        dailyList.appendChild(li);
+      });
+    }
+
+    // Add daily task
+    function addTodo() {
+      const val = todoInput.value.trim();
+      if (!val) return;
+      
+      const priority = parseInt(prioritySelect.value);
+      dailyTodos.push({ 
+        text: val, 
+        done: false, 
+        priority: priority 
+      });
+      
+      todoInput.value = "";
+      saveDailyTodos();
+      renderDailyTodos();
+    }
+
+    // Update countdown display
+    function updateCountdown() {
+      if (!countdownActive) {
+        countdownEl.textContent = "▶ Click 'Start' to begin";
+        progressBar.value = 0;
+        successMsg.innerHTML = "";
+        return;
+      }
+
+      const dayCount = START_DAYS - currentDay + 1;
+      
+      // Update skip days info
+      skipDaysUsed = programData.skipDaysUsed || 0;
+      skipDayBtn.textContent = `⏭ Skip Day (${skipDaysUsed}/${MAX_SKIP_DAYS})`;
+      skipDayBtn.disabled = skipDaysUsed >= MAX_SKIP_DAYS;
+
+      if (dayCount > 0) {
+        countdownEl.textContent = `${dayCount} days remaining`;
+        progressBar.value = START_DAYS - dayCount;
+        successMsg.innerHTML = "";
+      } else {
+        countdownEl.textContent = "";
+        progressBar.value = START_DAYS;
+        successMsg.innerHTML = `<h2 style="color:var(--primary);">✔ Congratulations, you've completed the program!</h2>`;
+      }
+    }
+
+    // Start the countdown
+    function startCountdown() {
+      if (mustTodos.length === 0) {
+        alert("Please add at least one mandatory task before starting!");
+        return;
+      }
+
+      countdownActive = true;
+      programData.startDate = new Date().toISOString();
+      programData.currentDay = 1;
+      currentDay = 1;
+      mustListLocked = true;
+      
+      saveProgramData();
+      updateCountdown();
+      renderMustList();
+      showNotification("90-Day Discipline Challenge started!");
+      
+      // Play countdown sound if we have timeline settings
+      if (programData.timelineSettings.startDate && programData.timelineSettings.endDate) {
+        playCountdownSound();
+      }
+    }
+
+    // Stop the countdown
+    function stopCountdown() {
+      countdownActive = false;
+      programData.startDate = null;
+      saveProgramData();
+      updateCountdown();
+    }
+
+    // Skip a day
+    function skipDay() {
+      skipDaysUsed = programData.skipDaysUsed || 0;
+      
+      if (skipDaysUsed >= MAX_SKIP_DAYS) {
+        alert(`You've already used all ${MAX_SKIP_DAYS} skip days!`);
+        return;
+      }
+
+      if (confirm("Skip today? This will count as a completed day but you won't need to complete tasks.")) {
+        skipDaysUsed++;
+        programData.skipDaysUsed = skipDaysUsed;
+        programData.days[currentDay] = {
+          ...programData.days[currentDay],
+          skipped: true
+        };
+        
+        currentDay++;
+        programData.currentDay = currentDay;
+        saveProgramData();
+        
+        resetDailyTasks();
+        resetMustTaskStatus();
+        
+        updateCountdown();
+        showNotification("Day skipped successfully. Remember: you can only skip " + (MAX_SKIP_DAYS - skipDaysUsed) + " more days.");
+      }
+    }
+
+    // Reset all data
+    function resetAll() {
+      if (confirm("Are you sure? This will reset all data.")) {
+        countdownActive = false;
+        mustTodos = [
+          "🧠 Study for 1 hour",
+          "📓 Review notes",
+          "🧘‍♂️ Meditate for 5 minutes",
+          "🚶 Take a walk or exercise",
+          "📴 Turn off phone for 1 hour"
+        ];
+        dailyTodos = [];
+        mustTodoState = mustTodos.map(() => false);
+        mustListLocked = false;
+        skipDaysUsed = 0;
+        currentDay = 1;
+        
+        programData = {
+          startDate: null,
+          days: {},
+          currentDay: 1,
+          journalEntries: [],
+          skipDaysUsed: 0,
+          timelineSettings: {
+            startDate: null,
+            endDate: null,
+            dailyStartTime: "08:00"
+          }
+        };
+        
+        saveProgramData();
+        renderDailyTodos();
+        renderMustList();
+        updateCountdown();
+        
+        // Reset timeline
+        startDateInput.value = "";
+        endDateInput.value = "";
+        dailyStartTimeInput.value = "08:00";
+        spaceship.style.left = "0%";
+        clearInterval(timelineInterval);
+      }
+    }
+
+    // Toggle audio
+    function toggleAudio() {
+      if (audioPlaying) {
+        bgMusic.pause();
+        audioPlaying = false;
+        toggleAudioBtn.textContent = "🔈 Sound Off";
+      } else {
+        bgMusic.play().catch(e => console.log("Audio playback blocked:", e));
+        audioPlaying = true;
+        toggleAudioBtn.textContent = "🔊 Sound On";
+      }
+    }
+
+    // Show random quote
+    function showRandomQuote() {
+      const idx = Math.floor(Math.random() * banglaQuotes.length);
+      quoteEl.textContent = banglaQuotes[idx];
+    }
+
+    // Reset daily tasks
+    function resetDailyTasks() {
+      dailyTodos = [];
+      saveDailyTodos();
+      renderDailyTodos();
+    }
+
+    // Reset mandatory task status
+    function resetMustTaskStatus() {
+      mustTodoState = mustTodos.map(() => false);
+      saveMustState();
+      renderMustList();
+    }
+
+    // Load star system
+    function loadStarSystem() {
+      totalStars = programData.totalStars || 0;
+      starCountEl.textContent = totalStars;
+      
+      // Load badge data
+      const savedBadges = programData.badges;
+      if (savedBadges) {
+        badges.forEach(badge => {
+          const savedBadge = savedBadges.find(b => b.id === badge.id);
+          if (savedBadge) {
+            badge.owned = savedBadge.owned;
+            badge.selected = savedBadge.selected;
+          }
+        });
+      }
+      
+      // Set selected badge
+      const selected = badges.find(b => b.selected);
+      if (selected) {
+        userSubtitleEl.textContent = selected.title;
+        selectedBadge = selected;
+      }
+    }
+
+    // Save star system
+    function saveStarSystem() {
+      programData.totalStars = totalStars;
+      programData.badges = badges;
+      saveProgramData();
+      starCountEl.textContent = totalStars;
+    }
+
+    // Check for star earning
+    function checkStarEarning() {
+      const todayKey = new Date().toISOString().split('T')[0];
+      const lastStarDate = programData.lastStarDate;
+      
+      // Check if already earned star today
+      if (lastStarDate === todayKey) return;
+      
+      const completedMustTasks = mustTodoState.filter(Boolean).length;
+      const completedDailyTasks = dailyTodos.filter(t => t.done).length;
+      const totalCompleted = completedMustTasks + completedDailyTasks;
+      
+      if (totalCompleted >= 10) {
+        totalStars++;
+        programData.lastStarDate = todayKey;
+        saveStarSystem();
+        showNotification(`Congratulations! You earned 1 ⭐ star today!`);
+      }
+    }
+
+    // Render badge shop
+    function renderBadgeShop() {
+      badgeShopItems.innerHTML = '';
+      
+      badges.forEach(badge => {
+        const badgeDiv = document.createElement('div');
+        badgeDiv.className = `badge ${badge.owned ? '' : 'locked'}`;
+        
+        badgeDiv.innerHTML = `
+          <div class="badge-icon">${badge.icon}</div>
+          <div class="badge-info">
+            <div class="badge-title">${badge.title}</div>
+            <div class="badge-desc">${badge.desc}</div>
+            ${badge.owned ? 
+              `<div class="badge-select ${badge.selected ? 'selected' : ''}" 
+                    onclick="selectBadge('${badge.id}')">
+                ${badge.selected ? 'Selected' : 'Select'}
+              </div>` : 
+              `<div class="badge-price">Price: ${badge.price} ⭐</div>
+               <div class="badge-buy" onclick="buyBadge('${badge.id}')">Buy</div>`
+            }
+          </div>
+        `;
+        
+        badgeShopItems.appendChild(badgeDiv);
+      });
+    }
+
+    // Buy badge function
+    function buyBadge(badgeId) {
+      const badge = badges.find(b => b.id === badgeId);
+      if (!badge || badge.owned) return;
+      
+      if (totalStars >= badge.price) {
+        if (confirm(`Buy ${badge.title} badge for ${badge.price} ⭐?`)) {
+          totalStars -= badge.price;
+          badge.owned = true;
+          saveStarSystem();
+          renderBadgeShop();
+          showNotification(`Congratulations! You unlocked ${badge.title} badge!`);
+        }
+      } else {
+        alert(`Not enough stars! You need ${badge.price} ⭐ for this badge.`);
+      }
+    }
+
+    // Select badge function
+    function selectBadge(badgeId) {
+      badges.forEach(b => b.selected = false);
+      const badge = badges.find(b => b.id === badgeId);
+      if (badge && badge.owned) {
+        badge.selected = true;
+        selectedBadge = badge;
+        userSubtitleEl.textContent = badge.title;
+        saveStarSystem();
+        renderBadgeShop();
+        renderAchievements();
+      }
+    }
+
+    // Render achievements
+    function renderAchievements() {
+      achievementsList.innerHTML = '';
+      
+      badges.forEach(badge => {
+        if (badge.owned) {
+          const badgeDiv = document.createElement('div');
+          badgeDiv.className = `badge ${badge.selected ? 'selected' : ''}`;
+          
+          badgeDiv.innerHTML = `
+            <div class="badge-icon">${badge.icon}</div>
+            <div class="badge-info">
+              <div class="badge-title">${badge.title}</div>
+              <div class="badge-desc">${badge.desc}</div>
+              <div class="badge-select" onclick="selectBadge('${badge.id}')">
+                ${badge.selected ? 'Selected' : 'Select'}
+              </div>
+            </div>
+          `;
+          
+          achievementsList.appendChild(badgeDiv);
+        }
+      });
+    }
+
+    // Show notification
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.style.position = 'fixed';
+      notification.style.bottom = '20px';
+      notification.style.right = '20px';
+      notification.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+      notification.style.color = 'var(--primary)';
+      notification.style.padding = '15px';
+      notification.style.border = '1px solid var(--primary)';
+      notification.style.borderRadius = '5px';
+      notification.style.zIndex = '1000';
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 500);
+      }, 3000);
+    }
+
+    // Journal functions
+    function saveJournalEntry() {
+      const content = journalEntry.value.trim();
+      if (!content) return;
+      
+      const entry = {
+        day: currentDay,
+        date: new Date().toLocaleDateString(),
+        content: content
+      };
+      
+      programData.journalEntries.unshift(entry);
+      saveProgramData();
+      journalEntry.value = '';
+      loadJournalEntries();
+      showNotification("Journal entry saved!");
+    }
+
+    // Load journal entries
+    function loadJournalEntries() {
+      journalEntries.innerHTML = '';
+      
+      programData.journalEntries
+        .filter(entry => entry.day === currentDay)
+        .forEach(entry => {
+          const entryDiv = document.createElement('div');
+          entryDiv.className = 'journal-entry';
+          
+          const dateDiv = document.createElement('div');
+          dateDiv.className = 'journal-date';
+          dateDiv.textContent = entry.date;
+          
+          const contentDiv = document.createElement('div');
+          contentDiv.textContent = entry.content;
+          
+          entryDiv.appendChild(dateDiv);
+          entryDiv.appendChild(contentDiv);
+          journalEntries.appendChild(entryDiv);
+        });
+    }
+
+    // Day navigation functions
+    function navigateToDay(day) {
+      if (day < 1) day = 1;
+      if (day > START_DAYS) day = START_DAYS;
+      
+      currentDay = day;
+      currentDayDisplay.textContent = `Day ${currentDay}`;
+      
+      // Load data for this day
+      loadMustState();
+      loadDailyTodos();
+      loadJournalEntries();
+      
+      // Render the day view
+      renderDayView();
+    }
+
+    function renderDayView() {
+      const dayData = programData.days[currentDay] || {};
+      
+      dayTitle.textContent = `Day ${currentDay}`;
+      
+      // Render tasks
+      let tasksHtml = '';
+      if (dayData.skipped) {
+        tasksHtml = '<div class="day-skipped">This day was skipped</div>';
+      } else {
+        const mustTasks = mustTodos.map((task, i) => {
+          const done = dayData.mustTodoState ? dayData.mustTodoState[i] : false;
+          return `<div>${done ? '✓' : '✗'} ${task}</div>`;
+        }).join('');
+        
+        const dailyTasks = (dayData.dailyTodos || []).map(task => {
+          return `<div>${task.done ? '✓' : '✗'} ${task.text} (Priority: ${task.priority})</div>`;
+        }).join('');
+        
+        tasksHtml = `
+          <h4>Mandatory Tasks</h4>
+          ${mustTasks}
+          <h4>Daily Tasks</h4>
+          ${dailyTasks || 'No tasks recorded'}
+        `;
+      }
+      
+      dayTasks.innerHTML = tasksHtml;
+      
+      // Render journal
+      const journalEntry = programData.journalEntries.find(entry => entry.day === currentDay);
+      dayJournal.innerHTML = journalEntry ? `
+        <h4>Journal Entry</h4>
+        <div>${journalEntry.content}</div>
+      ` : '<div>No journal entry for this day</div>';
+    }
+
+    // Timeline functions
+    function saveTimelineSettingsHandler() {
+      if (!startDateInput.value || !endDateInput.value) {
+        alert("Please select both start and end dates");
+        return;
+      }
+      
+      const startDate = new Date(startDateInput.value);
+      const endDate = new Date(endDateInput.value);
+      
+      if (endDate <= startDate) {
+        alert("End date must be after start date");
+        return;
+      }
+      
+      saveTimelineSettings();
+      updateTimelineVisual();
+      startTimelineUpdates();
+      renderMilestones();
+      timelineModal.style.display = 'none';
+      showNotification("Timeline settings saved!");
+      
+      // Play countdown sound if program is active
+      if (countdownActive) {
+        playCountdownSound();
+      }
+    }
+
+    // Initialize the app
+    init();
+
+    // Event listeners
+    addMustTaskBtn.onclick = addMustTask;
+    mustTaskInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") addMustTask();
+    });
+
+    addTodoBtn.onclick = addTodo;
+    todoInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") addTodo();
+    });
+
+    startBtn.onclick = startCountdown;
+    stopBtn.onclick = stopCountdown;
+    resetBtn.onclick = resetAll;
+    skipDayBtn.onclick = skipDay;
+    toggleAudioBtn.onclick = toggleAudio;
+    saveJournalBtn.onclick = saveJournalEntry;
+    saveTimelineBtn.onclick = saveTimelineSettingsHandler;
+
+    badgeShopBtn.onclick = () => badgeShopModal.style.display = 'flex';
+    achievementBtn.onclick = () => achievementsModal.style.display = 'flex';
+    journalBtn.onclick = () => {
+      journalModal.style.display = 'flex';
+      navigateToDay(currentDay);
+    };
+    timelineBtn.onclick = () => timelineModal.style.display = 'flex';
+    
+    closeBadgeShop.onclick = () => badgeShopModal.style.display = 'none';
+    closeAchievements.onclick = () => achievementsModal.style.display = 'none';
+    closeJournal.onclick = () => journalModal.style.display = 'none';
+    closeTimeline.onclick = () => timelineModal.style.display = 'none';
+    
+    prevDayBtn.onclick = () => navigateToDay(currentDay - 1);
+    nextDayBtn.onclick = () => navigateToDay(currentDay + 1);
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+      if (event.target === badgeShopModal) {
+        badgeShopModal.style.display = 'none';
+      }
+      if (event.target === achievementsModal) {
+        achievementsModal.style.display = 'none';
+      }
+      if (event.target === journalModal) {
+        journalModal.style.display = 'none';
+      }
+      if (event.target === timelineModal) {
+        timelineModal.style.display = 'none';
+      }
+    };
+
+    // Global functions
+    window.selectBadge = selectBadge;
+    window.buyBadge = buyBadge;
+  </script>
+</body>
+</html>
